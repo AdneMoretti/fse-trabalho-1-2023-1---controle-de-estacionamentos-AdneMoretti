@@ -1,0 +1,50 @@
+{
+    "output": [
+        {
+            "item": "ENDERECO_01",
+            "porta": 13
+        },
+        {
+            "item": "ENDERECO_02",
+            "porta": 6
+        },
+        {
+            "item": "ENDERECO_03",
+            "porta": 5
+        },
+        {
+            "item": "SINAL_DE_LOTADO_FECHADO",
+            "porta": 8
+        },
+        {
+            "item": "SENSOR_DE_PASSAGEM_1",
+            "porta": 16
+        },
+        {
+            "item": "SENSOR_DE_PASSAGEM_2",
+            "porta": 21
+        }
+    ],
+    "input": [
+        {
+            "item": "SENSOR_DE_VAGA",
+            "porta": 18
+        },
+        {
+            "item": "SENSOR_ABERTURA_CANCELA_ENTRADA",
+            "porta": 23
+        },
+        {
+            "item": "SENSOR_FECHAMENTO_CANCELA_ENTRADA",
+            "porta": 24
+        },
+        {
+            "item": "SENSOR_ABERTURA_CANCELA_SAIDA",
+            "porta": 25
+        }, 
+        {
+            "item": "SENSOR_FECHAMENTO_CANCELA_SAIDA",
+            "porta": 12
+        }
+    ]
+}
