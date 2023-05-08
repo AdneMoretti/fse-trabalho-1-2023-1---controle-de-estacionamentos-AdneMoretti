@@ -1,4 +1,6 @@
 {
+    "ip_central": 1, 
+    "porta_central": 1,
     "output": [
         {
             "item": "ENDERECO_01",

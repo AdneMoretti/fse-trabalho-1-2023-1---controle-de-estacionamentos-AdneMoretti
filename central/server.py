@@ -1,5 +1,6 @@
 import socket
 import sys
+from threading import Thread
 
 # Manter conexão com os servidores distribuídos (TCP/IP);
 # Prover uma interface que mantenham atualizadas as seguintes informações:
@@ -10,6 +11,15 @@ import sys
 # 1. Manualmente: à partir de um comando de usuário ativar/desativar o sinal de Lotado/Fechado; 2. Automaticamente: à partir da contagem e lotação total das vagas de todos os andares, ativar/destivar o sinal de Lotado/Fechado; b. Bloquear o 2º Andar:
 # 1. mesmo sem estar com todas as vagas ocupadas, sinalizar o impedimento ao 2º Andar ativando o "Sinal de Lotado";
 
+
+def present_menu(): 
+    print("----------------- Menu --------------\n"+
+    "1. Fechar o estacionamento\n"+
+    "2. Ativar o sinal de Lotado\n"+
+    "3. Desativar o sinal de lotado"
+    "4. Bloquear o segundo andar")
+
+
 def show_states(): 
     print(
         "\n------------------States ----------------\n"+
@@ -17,16 +27,39 @@ def show_states():
         "2º andar: \n"
     )
 
+def receive(conection, addr): 
+    while(True): 
+        data = conection.recv(2048)
+        if not data:
+            print('Message not received')
+             
+            break
+
+def send(): 
+    pass
+
+def socket_init(host, port):
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    addr = host, port
+    # Zerar time wait do socket
+    server.bind(addr)
+    server.listen()
+    while True:
+      conn, addr  = server.accept()
+      
+      listen_socket_thread = Thread(target=receive, args=(conn, addr ))
+      listen_socket_thread.start()
+
+      send_command_thread = Thread(target=send, args=(conn, addr ))
+      send_command_thread.start()
+
 def main(): 
     host = sys.argv[1]
     port = sys.argv[2]
     addr = (host, port)
+    server_socket = Thread(target=socket_init, args=(host, port))
+    server_socket.start()
     # Aqui será criado o mecanismo de socket para receber a conexão, nesse caso TCP/IP
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # Zerar time wait do socket
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(addr)
-    server.listen()
 
 if __name__ == '__main__': 
     main()
