@@ -6,7 +6,8 @@ from threading import Thread
 from uuid import uuid4
 
 response_message = {
-    "value": 0
+    "value": 0,
+    "status": []
 }
 status = []
 car_id = ""
@@ -70,12 +71,12 @@ def vacancy_monitor():
             )
             time.sleep(0.1)
             entering = config_file["input"][0]["porta"]
-            if(GPIO.input(entering)==1 and status[counter]["ocupada"]==0):
+            if(GPIO.input(entering)==1 and status["status"][counter]["ocupada"]==0):
                 status[counter]["id"] = car_id
                 status[counter]["time"] = start_time_entering
                 status[counter]["ocupada"] = 1
 
-            elif(GPIO.input(entering)==0 and status[counter]["ocupada"]==1):
+            elif(GPIO.input(entering)==0 and status["status"][counter]["ocupada"]==1):
                 status[counter]["id"] = ""
                 status[counter]["ocupada"] = 0
                 status[counter]["time"] = start_time_entering
@@ -92,43 +93,56 @@ def calculate_number_people_entering(pin):
     GPIO.output(config_file["output"][4]["porta"], GPIO.HIGH)
     time.sleep(0.1)
     GPIO.output(config_file["output"][4]["porta"], GPIO.LOW)
+    # GPIO.output(config_file["output"][4]["porta"], GPIO.LOW)
     print("aqui")
     start_time_entering = time.time()
     qtd_cars+=1
+    # while(True): 
+    #     if(GPIO.input(pin)==0):
+    #         qtd_cars+=1
+    #         break
     print(qtd_cars)
 
 def calculate_number_people_leaving(pin):
-    global config_file, qtd_cars, response_message, vaga
+    global config_file, qtd_cars, response_message
     global end_time_entering
     GPIO.output(config_file["output"][5]["porta"], GPIO.HIGH)
     time.sleep(0.1)
     GPIO.output(config_file["output"][5]["porta"], GPIO.LOW)
     exit_time = time.time()
-    # car_value = round(((exit_time - status[vaga]["time"])/60)*0.15)
-    car_value = round((((exit_time - status[vaga]["time"])/60)*0,15))
-    response_message["cars"] = qtd_cars
-    response_message["value"] += round(car_value, 2)
+    car_value = exit_time - status[vaga]["time"]
+    response_message["value"]+=car_value
+    # while(True): 
+    #     if(GPIO.input(pin)==0):
+    #         qtd_cars-=1
+    #         break
     qtd_cars-=1
-    print(response_message)
+    print(qtd_cars)
 
 
 def count_enter_cars():
     global config_file
     entering_pin = config_file["input"][1]["porta"]
     leaving_pin = config_file["input"][3]["porta"]
+    # while(True):
+        # if(GPIO.input(entering_pin)==1):
+        #     GPIO.output(config_file["output"][4]["porta"], GPIO.HIGH)
+        #     car_id = uuid4()
+        # if(GPIO.input(config_file['input'][2]["porta"])==1):
+        #     GPIO.output(config_file["output"][4]["porta"], GPIO.LOW)
+        #     calculate_number_people_entering(config_file["input"][2]["porta"])
+
     GPIO.add_event_detect(entering_pin, GPIO.RISING, callback=lambda x: calculate_number_people_entering(entering_pin))
     GPIO.add_event_detect(leaving_pin, GPIO.RISING, callback=lambda x: calculate_number_people_leaving(leaving_pin))
 
 def create_message(): 
-    global response_message
     response_message["cars"] = qtd_cars
 
 def main():
     global config_file
     load_config()
     initialize_response()
-    # socket_thread = Thread(socket_init(), args=())
-    # socket_thread.start()
+    # socket_thread = Thread(sockset_init(), args=)
     monitoring = Thread(target=vacancy_monitor, args=())
     monitoring.start()
     count_thread = Thread(target=count_enter_cars, args=())

@@ -35,23 +35,20 @@ def receive(conection, addr):
              
             break
 
-def send(): 
+def send(conection, addr): 
     pass
 
 def socket_init(host, port):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     addr = host, port
-    # Zerar time wait do socket
     server.bind(addr)
     server.listen()
     while True:
-      conn, addr  = server.accept()
-      
-      listen_socket_thread = Thread(target=receive, args=(conn, addr ))
-      listen_socket_thread.start()
-
-      send_command_thread = Thread(target=send, args=(conn, addr ))
-      send_command_thread.start()
+        conn, addr  = server.accept()  
+        listen_thread = Thread(target=receive, args=(conn, addr ))
+        listen_thread.start()
+        send_thread = Thread(target=send, args=(conn, addr ))
+        send_thread.start()
 
 def main(): 
     host = sys.argv[1]
@@ -59,7 +56,6 @@ def main():
     addr = (host, port)
     server_socket = Thread(target=socket_init, args=(host, port))
     server_socket.start()
-    # Aqui será criado o mecanismo de socket para receber a conexão, nesse caso TCP/IP
 
 if __name__ == '__main__': 
     main()

@@ -40,23 +40,24 @@ def load_config():
 #             break
 #         except: 
 #             time.sleep(1)
+
 def read_status(config_file): 
     while(True): 
         if GPIO.input(config_file['input'][1]["porta"]) == GPIO.HIGH or GPIO.input(config_file['input'][1]["porta"]) == GPIO.HIGH:
-            verificar_ordem_sensores()
+            verificar_ordem_sensores(config_file)
 
 
-def verificar_ordem_sensores():
-    if GPIO.input(config_file['input'][1]["porta"]) == GPIO.HIGH and GPIO.input(config_file['input'][1]["porta"]) == GPIO.HIGH:
+def verificar_ordem_sensores(config_file):
+    if GPIO.input(config_file['input'][1]["porta"]) == GPIO.HIGH:
         print("Carro subindo do 1º para o 2º andar")
-    elif GPIO.input(config_file['input'][1]["porta"]) == GPIO.HIGH and GPIO.input(config_file['input'][1]["porta"]) == GPIO.HIGH:
+    elif GPIO.input(config_file['input'][2]["porta"]) == GPIO.HIGH:
         print("Carro descendo do 2º para o 1º andar")
 
-# def cancel_gate(config_file):
-#     print(config_file)
-#     GPIO.output(config_file["output"][4]["porta"], GPIO.HIGH)
-#     sleep(5)
-#     GPIO.output(config_file["output"][4]["porta"], GPIO.LOW)
+def open_gate(config_file):
+    print(config_file)
+    GPIO.output(config_file["output"][4]["porta"], GPIO.HIGH)
+    sleep(5)
+    GPIO.output(config_file["output"][4]["porta"], GPIO.LOW)
 
 # def calculate_number_people_entering(pin):
 #   global start_time_entering, end_time_entering, qtd_pessoas
@@ -91,7 +92,6 @@ def format_message():
 def main():
     config_file = load_config()
     #socket_init()
-    temp = GPIO.input(23)
     read_status(config_file)
 
 main()
