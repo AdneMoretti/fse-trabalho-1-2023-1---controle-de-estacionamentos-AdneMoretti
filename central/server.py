@@ -21,17 +21,32 @@ parking_2 = 0
 command = {}
 
 def present_menu(): 
+    global qtd_cars
     while(True):
         print("----------------- Menu --------------\n"+
         "1. Fechar o estacionamento\n"+
-        "2. Ativar o sinal de Lotado\n"+
-        "3. Desativar o sinal de lotado\n"
-        "4. Bloquear o segundo andar\n"+
+        "2. Abrir o estacionamento\n"+
+        "3. Bloquear segundo andar\n"+
+        "4. Desbloquar segundo andar\n"
         "5. Sair")
-        # option = int(input())
-        # if(option==5): 
-        #     break
-
+        option = int(input())
+        if(option==5): 
+            break
+        elif(option==1):
+            command["SINAL_DE_LOTADO_FECHADO_1"] = 1
+        elif(option== 2): 
+            if(qtd_cars<16):
+                command["SINAL_DE_LOTADO_FECHADO_1"] = 0
+            else: 
+                print("Estacionamento já está lotado")
+        elif(option==3):
+            command["SINAL_DE_LOTADO_FECHADO_2"] = 1
+        elif(option==4):
+            if(qtd_cars_2<8):
+                command["SINAL_DE_LOTADO_FECHADO_2"] = 0
+            else: 
+                print("Andar 2 já está lotado")
+        send()
 
 def show_states(): 
     global qtd_cars, qtd_cars_2, parking_1, parking_2
@@ -64,7 +79,7 @@ def show_states():
     # elif(vaga2!=-1 and message_2["status"][vaga]["ocupada"]==0):  
     #     total_value += exit - message_1["status"][vaga]["time"]
 def check_first_floor(): 
-    global car_id, entering_time, total_value
+    global car_id, entering_time, total_value, parking_1, parking_2
     vaga = message_1["vaga"]
     if(message_1["state"][vaga]["state"]==0): 
         parking_1-=1
@@ -117,9 +132,11 @@ def receive(conection):
             print('Message not received')
             break
 
-def send(connection, addr): 
+def send(connection): 
     global command
-    command_socket = json.dumps(command)
+    command_socket = json.dumps(command).encode()
+    connection.send(command_socket)
+
 
 def socket_init(host, port):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

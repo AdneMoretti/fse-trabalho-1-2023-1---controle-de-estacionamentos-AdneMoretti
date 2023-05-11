@@ -28,15 +28,16 @@ def initialize_response():
     for i in range(8):
         state.append({"state":0})
 
-# def listen_socket(): 
-#     while True: 
-#         data = firstfloor.recv(1024)
-#         if not data:
-#             print(data)
-#             print('Message not received')
+def listen_socket(): 
+    while True: 
+        data = firstfloor.recv(1024)
+        if not data:
+            print(data)
+            print('Message not received')
              
-#             break
-#     time.sleep(1)
+            break
+    time.sleep(1)
+
 def send_gate(): 
     data_new = json.dumps(entering_message).encode()
     firstfloor.send(data_new)

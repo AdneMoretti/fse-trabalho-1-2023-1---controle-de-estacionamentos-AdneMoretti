@@ -15,7 +15,7 @@
             "gpio": 5
         },
         {
-            "item": "SINAL_DE_LOTADO_FECHADO",
+            "item": "SINAL_DE_LOTADO_FECHADO_2",
             "gpio": 8
         }
     ],
