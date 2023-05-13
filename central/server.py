@@ -22,12 +22,14 @@ command = {
     "SINAL_DE_LOTADO_FECHADO_1": 0,
     "SINAL_DE_LOTADO_FECHADO_2": 0
 }
-times = []
+times_1 = []
+times_2 = []
 
 def initialize_times():
-    global times
+    global times_1
     for _ in range(8):
-        times.append({"car_id":"", "entering_time": 0})
+        times_1.append({"car_id":"", "entering_time": 0})
+        times_2.append({"car_id":"", "entering_time": 0})
 
 def present_menu(conn, addr): 
     global qtd_cars, qtd_cars_2
@@ -37,7 +39,7 @@ def present_menu(conn, addr):
         "2. Abrir o estacionamento\n"+
         "3. Bloquear segundo andar\n"+
         "4. Desbloquar segundo andar\n"+
-        "5.Ver status do estacionamento\n"
+        "5. Ver status do estacionamento\n"
         "6. Sair")
         option = int(input())
         if option == 6: 
@@ -72,24 +74,6 @@ def show_states():
           f"Quantidade de vagas disponíveis: {8-parking_2}\n"+
           f"Quantidade de carros: {qtd_cars_2}\n")
 
-
-# def calculate_exit_time(): 
-#     global total_value
-#     vaga =  message_1["vaga"]
-#     vaga2 = message_2["vaga"]
-
-    # if(vaga!=-1 and message_1["status"][vaga]["ocupada"]==0):
-    #     exit = time.time()
-    #     total_value += exit - message_1["status"][vaga]["time"]
-
-    # elif(vaga2!=-1 and message_2["status"][vaga]["ocupada"]==1):  
-    #     message_2["status"][vaga]["time"] = message_1["car_entering_time"]
-
-    # elif(vaga!=-1 and message_1["status"][vaga]["ocupada"]==1):
-    #     message_1["status"][vaga]["time"] = message_1["car_entering_time"]
-
-    # elif(vaga2!=-1 and message_2["status"][vaga]["ocupada"]==0):  
-    #     total_value += exit - message_1["status"][vaga]["time"]
 def check_first_floor(): 
     global car_id, entering_time, total_value, parking_1, parking_2
     print(message_1)
@@ -97,27 +81,27 @@ def check_first_floor():
     if(message_1["state"][vaga]["state"]==0): 
         parking_1 -= 1
         print("Carro saiu na vaga do primeiro andar")
-        total_time = time.time() - times[vaga]["entering_time"]
+        total_time = time.time() - times_1[vaga]["entering_time"]
         total_value += round((total_time/60)*0.15, 3)
     else: 
         print("carro entrou na vaga do primeiro andar")
         parking_1 += 1
-        times[vaga]["entering_time"] = entering_time
-        times[vaga]["car_id"] = car_id
+        times_1[vaga]["entering_time"] = entering_time
+        times_1[vaga]["car_id"] = car_id
 
 def check_second_floor(): 
-    global car_id, entering_time
+    global car_id, entering_time, times_2
     vaga = message_2["vaga"]
     if(message_2["state"][vaga]["state"]==0): 
         parking_2-=1
         print("Carro saiu da vaga do segundo andar")
-        total_time = time.time() - times[vaga]["entering_time"]
+        total_time = time.time() - times_2[vaga]["entering_time"]
         total_value += round((total_time/60)*0.15, 3)
     else: 
         parking_2+=1
         print("carro entrou na vaga do segundo andar")
-        times[vaga]["entering_time"] = entering_time
-        times[vaga]["car_id"] = car_id
+        times_2[vaga]["entering_time"] = entering_time
+        times_2[vaga]["car_id"] = car_id
 
 def receive(connection, addr): 
     global message_1, message_2, qtd_cars, qtd_cars_2, car_id, entering_time

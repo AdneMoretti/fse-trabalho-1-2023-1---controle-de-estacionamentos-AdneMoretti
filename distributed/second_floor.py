@@ -113,7 +113,6 @@ def vacancy_monitor():
                 state[counter]["state"] = 0
                 response_message["vaga"] = counter
                 send_socket()
-            # GPIO.add_event_detect(entering, GPIO.RISING, callback=lambda x: add_id_to(counter))
             counter += 1
 
 def calculate_qtd_cars_entering(pin):
@@ -121,11 +120,6 @@ def calculate_qtd_cars_entering(pin):
     entering_message["gate"]=1
     send_gate()
 
-# def close_cancel(pin):
-#     GPIO.output(pin, GPIO.LOW)
-
-# def close_cancel_leave(pin): 
-#     GPIO.output(pin, GPIO.LOW)
 
 def calculate_qtd_cars_leaving(pin):
     global entering_message
