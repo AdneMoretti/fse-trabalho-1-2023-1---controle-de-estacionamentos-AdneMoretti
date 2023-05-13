@@ -135,11 +135,11 @@ def receive(connection, addr):
         elif data["id"] == 3:
             if(data["gate"]==1):
                 print("Alguem entrou do segundo") 
-                qtd_cars2 +=1
+                qtd_cars_2 +=1
 
             else: 
                 print("Alguem saiu do segundo")
-                qtd_cars2-=1
+                qtd_cars_2-=1
         
         if qtd_cars==16 or (qtd_cars==8 and command["SINAL_DE_LOTADO_FECHADO_2"]==1): 
             print("lotou")

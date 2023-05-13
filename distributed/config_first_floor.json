@@ -3,49 +3,49 @@
     "porta_central": 10831,
     "output": [
         {
-            "item": "ENDERECO_01",
+            "name": "ENDERECO_01",
             "gpio": 22
         },
         {
-            "item": "ENDERECO_02",
+            "name": "ENDERECO_02",
             "gpio": 26
         },
         {
-            "item": "ENDERECO_03",
+            "name": "ENDERECO_03",
             "gpio": 19
         },
         {
-            "item": "SINAL_DE_LOTADO_FECHADO_1",
+            "name": "SINAL_DE_LOTADO_FECHADO_1",
             "gpio": 27
         },
         {
-            "item": "MOTOR_CANCELA_ENTRADA",
+            "name": "MOTOR_CANCELA_ENTRADA",
             "gpio": 10
         },
         {
-            "item": "MOTOR_CANCELA_SAIDA",
+            "name": "MOTOR_CANCELA_SAIDA",
             "gpio": 17
         }
     ],
     "input": [
         {
-            "item": "SENSOR_DE_VAGA",
+            "name": "SENSOR_DE_VAGA",
             "gpio": 18
         },
         {
-            "item": "SENSOR_ABERTURA_CANCELA_ENTRADA",
+            "name": "SENSOR_ABERTURA_CANCELA_ENTRADA",
             "gpio": 23
         },
         {
-            "item": "SENSOR_FECHAMENTO_CANCELA_ENTRADA",
+            "name": "SENSOR_FECHAMENTO_CANCELA_ENTRADA",
             "gpio": 24
         },
         {
-            "item": "SENSOR_ABERTURA_CANCELA_SAIDA",
+            "name": "SENSOR_ABERTURA_CANCELA_SAIDA",
             "gpio": 25
         }, 
         {
-            "item": "SENSOR_FECHAMENTO_CANCELA_SAIDA",
+            "name": "SENSOR_FECHAMENTO_CANCELA_SAIDA",
             "gpio": 12
         }
     ]

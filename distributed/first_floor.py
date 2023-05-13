@@ -7,7 +7,7 @@ from threading import Thread
 response_message = {
     "value": 0,
     "vaga": -1, 
-    "id":1
+    "id": 1
 }
 
 entering_message = {
@@ -53,7 +53,6 @@ def execute_command(received_message):
 #     firstfloor.send(data_new)
     
 def send_socket(message): 
-    global response_message, state
     try:
         data = (json.dumps(message))
         data = data.encode()
@@ -162,7 +161,7 @@ def main():
     initialize_response()
     socket_thread = Thread(target=socket_init, args=())
     socket_thread.start()
-    count_thread = Thread(target=count_enter_cars, args=())
+    count_thread = Thread(target=count_cars, args=())
     count_thread.start()
     monitoring = Thread(target=vacancy_monitor, args=())
     monitoring.start()
