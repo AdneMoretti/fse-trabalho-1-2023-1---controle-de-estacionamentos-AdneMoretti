@@ -1,36 +1,36 @@
 {
-    "ip_central": "164.41.98.15", 
+    "ip_central": "164.41.98.27", 
     "porta_central": 10831,
     "output": [
         {
             "name": "ENDERECO_01",
-            "gpio": 13
+            "gpio": 21
         },
         {
             "name": "ENDERECO_02",
-            "gpio": 6
+            "gpio": 20
         },
         {
             "name": "ENDERECO_03",
-            "gpio": 5
+            "gpio": 16
         },
         {
             "name": "SINAL_DE_LOTADO_FECHADO_2",
-            "gpio": 8
+            "gpio": 12
         }
     ],
     "input": [
         {
             "name": "SENSOR_DE_VAGA",
-            "gpio": 20
+            "gpio": 23
         },
         {
             "name": "SENSOR_DE_PASSAGEM_1",
-            "gpio": 16
+            "gpio": 25
         },
         {
             "name": "SENSOR_DE_PASSAGEM_2",
-            "gpio": 21
+            "gpio": 24
         }
     ]
 }

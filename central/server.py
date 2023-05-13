@@ -43,26 +43,25 @@ def present_menu(conn, addr):
         "6. Sair")
         option = int(input())
         if option == 6: 
-            break
+            exit(0)
         elif option == 1 and command["SINAL_DE_LOTADO_FECHADO_1"] == 0:
             command["SINAL_DE_LOTADO_FECHADO_1"] = 1
-            send(conn, addr)
+            send_socket(conn, addr)
         elif option == 2: 
             if(qtd_cars<16):
                 command["SINAL_DE_LOTADO_FECHADO_1"] = 0
             else: 
                 print("Estacionamento já está lotado")
-            send(conn, addr)
+            send_socket(conn, addr)
         elif option == 3:
             command["SINAL_DE_LOTADO_FECHADO_2"] = 1
-            send(conn, addr)
+            send_socket(conn, addr)
         elif option == 4:
             if(qtd_cars_2 < 8):
-                print("oi")
                 command["SINAL_DE_LOTADO_FECHADO_2"] = 0
             else: 
                 print("Andar 2 já está lotado")
-            send(conn, addr)
+            send_socket(conn, addr)
         elif(option==5): 
             show_states()
 
@@ -79,8 +78,8 @@ def show_states():
           f"Quantidade de carros: {qtd_cars_2}\n")
 
 def check_first_floor(): 
-    global car_id, entering_time, total_value, parking_1, parking_2
-    print(message_1)
+    global car_id, entering_time, total_value, parking_1
+    total_time = 0
     vaga = message_1["vaga"]
     if(message_1["state"][vaga]["state"]==0): 
         parking_1 -= 1
@@ -95,7 +94,7 @@ def check_first_floor():
         times_1[vaga]["car_id"] = car_id
 
 def check_second_floor(): 
-    global car_id, entering_time, times_2
+    global car_id, entering_time, times_2, parking_2
     vaga = message_2["vaga"]
     if(message_2["state"][vaga]["state"]==0): 
         parking_2-=1
@@ -135,37 +134,42 @@ def receive(connection, addr):
         elif data["id"] == 3:
             if(data["gate"]==1):
                 print("Alguem entrou do segundo") 
-                qtd_cars_2 +=1
+                qtd_cars_2 += 1
 
             else: 
                 print("Alguem saiu do segundo")
-                qtd_cars_2-=1
+                qtd_cars_2 -= 1 
         
         if qtd_cars==16 or (qtd_cars==8 and command["SINAL_DE_LOTADO_FECHADO_2"]==1): 
             print("lotou")
             command["SINAL_DE_LOTADO_FECHADO_1"] = 1
-            send(connection, addr)
+            send_socket(connection, addr)
 
         if(qtd_cars_2==8): 
             command["SINAL_DE_LOTADO_FECHADO_2"] = 1
-            send(connection, addr)
+            send_socket(connection, addr)
 
         if not data:
             print('Message not received')
             break
 
-def send(connection, addr): 
-    global command
-    command_socket = json.dumps(command).encode()
-    connection.send(command_socket)
-
+def send_socket(connection, addr):
+    try:
+        global command
+        command_socket = json.dumps(command).encode()
+        connection.send(command_socket)
+    except:
+        print("Erro ao tentar enviar mensagem")
+        connection.close()
+        socket_init() 
 
 def socket_init(host, port):
+    global server
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     addr = host, port
     server.bind(addr)
     server.listen()
-    print("Iniciando conexao")
+    print("Iniciando conexao do socket")
     while True:
         conn, addr = server.accept() 
         listen_thread = Thread(target=receive, args=(conn, addr))
@@ -177,8 +181,8 @@ def main():
     initialize_times()
     host = sys.argv[1]
     port = int(sys.argv[2])
-    server_socket_1 = Thread(target=socket_init, args=(host, port))
-    server_socket_1.start()
+    server_socket = Thread(target=socket_init, args=(host, port))
+    server_socket.start()
 
 if __name__ == '__main__': 
     main()

@@ -1,52 +1,52 @@
 {
-    "ip_central": "164.41.98.15", 
+    "ip_central": "164.41.98.27", 
     "porta_central": 10831,
     "output": [
         {
             "name": "ENDERECO_01",
-            "gpio": 22
-        },
-        {
-            "name": "ENDERECO_02",
             "gpio": 26
         },
         {
-            "name": "ENDERECO_03",
+            "name": "ENDERECO_02",
             "gpio": 19
         },
         {
+            "name": "ENDERECO_03",
+            "gpio": 13
+        },
+        {
             "name": "SINAL_DE_LOTADO_FECHADO_1",
-            "gpio": 27
+            "gpio": 6
         },
         {
             "name": "MOTOR_CANCELA_ENTRADA",
-            "gpio": 10
+            "gpio": 5
         },
         {
             "name": "MOTOR_CANCELA_SAIDA",
-            "gpio": 17
+            "gpio": 4
         }
     ],
     "input": [
         {
             "name": "SENSOR_DE_VAGA",
-            "gpio": 18
+            "gpio": 9
         },
         {
             "name": "SENSOR_ABERTURA_CANCELA_ENTRADA",
-            "gpio": 23
+            "gpio": 10
         },
         {
             "name": "SENSOR_FECHAMENTO_CANCELA_ENTRADA",
-            "gpio": 24
+            "gpio": 22
         },
         {
             "name": "SENSOR_ABERTURA_CANCELA_SAIDA",
-            "gpio": 25
+            "gpio": 27
         }, 
         {
             "name": "SENSOR_FECHAMENTO_CANCELA_SAIDA",
-            "gpio": 12
+            "gpio": 17
         }
     ]
 }

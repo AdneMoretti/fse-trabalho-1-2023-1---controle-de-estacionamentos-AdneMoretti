@@ -27,8 +27,9 @@ def initialize_response():
 
 # Socket para receber dados do servidor central
 def listen_socket(): 
+    global first_floor_socket
     while True: 
-        data = firstfloor.recv(1024)
+        data = first_floor_socket.recv(1024)
         if not data:
             print(data)
             print('Message not received')
@@ -38,7 +39,7 @@ def listen_socket():
             received_message = json.loads(received_message)
             execute_command(received_message)
     time.sleep(1)
-    firstfloor.close()
+    first_floor_socket.close()
 
 # Executa os comandos recebidos do central
 def execute_command(received_message): 
@@ -50,16 +51,16 @@ def execute_command(received_message):
 
 # def send_gate(): 
 #     data_new = json.dumps(entering_message).encode()
-#     firstfloor.send(data_new)
+#     first_floor_socket.send(data_new)
     
 def send_socket(message): 
     try:
         data = (json.dumps(message))
         data = data.encode()
-        firstfloor.send(data)
+        first_floor_socket.send(data)
     except:
         print("Erro ao tentar enviar mensagem")
-        firstfloor.close()
+        first_floor_socket.close()
         socket_init()
 
 def load_config():
@@ -76,15 +77,15 @@ def load_config():
         GPIO.setup(inp['gpio'], GPIO.IN)
 
 def socket_init():
-    global firstfloor
+    global first_floor_socket
     ip = config_file["ip_central"]
     port = int(config_file["porta_central"])
     addr = (ip, port)
     while(True): 
         try: 
             print("Iniciando conexão do socket")
-            firstfloor = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-            firstfloor.connect(addr)  
+            first_floor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+            first_floor_socket.connect(addr)  
             print("Connected")
             break
         except: 
