@@ -3,31 +3,65 @@ import RPi.GPIO as GPIO
 import json
 import time
 from threading import Thread
-from uuid import uuid4
 
 response_message = {
     "value": 0,
-    "status": []
+    "vaga": -1, 
+    "id":1
 }
-status = []
-car_id = ""
-qtd_cars = 0
-start_time_entering = 0
-vaga = 0
+
+entering_message = {
+    "id": 0, 
+    "gate": 0, 
+    "state": []
+}
+
+state = []
+received_message = {}
 
 def initialize_response(): 
-    global status
-    for i in range(8):
-        status.append({"ocupada":0, "id": "", "time": 0})
+    global state
+    for _ in range(8):
+        state.append({"state": 0})
+    response_message["state"] = state
 
+# Socket para receber dados do servidor central
 def listen_socket(): 
     while True: 
         data = firstfloor.recv(1024)
         if not data:
+            print(data)
             print('Message not received')
-             
             break
+        else: 
+            received_message = data.decode('utf-8')
+            received_message = json.loads(received_message)
+            execute_command(received_message)
     time.sleep(1)
+    firstfloor.close()
+
+# Executa os comandos recebidos do central
+def execute_command(received_message): 
+    lotado = config_file["output"][3]["gpio"]
+    if received_message["SINAL_DE_LOTADO_FECHADO_1"] == 1:
+        GPIO.output(lotado, GPIO.HIGH)
+    elif received_message["SINAL_DE_LOTADO_FECHADO_1"] == 0:
+        GPIO.output(lotado, GPIO.LOW)
+
+# def send_gate(): 
+#     data_new = json.dumps(entering_message).encode()
+#     firstfloor.send(data_new)
+    
+def send_socket(message): 
+    global response_message, state
+    try:
+        data = (json.dumps(message))
+        data = data.encode()
+        firstfloor.send(data)
+    except:
+        print("Erro ao tentar enviar mensagem")
+        firstfloor.close()
+        socket_init()
 
 def load_config():
     global config_file
@@ -37,31 +71,31 @@ def load_config():
     GPIO.setmode(GPIO.BCM)
 
     for output in config_file['output']: 
-        GPIO.setup(output['porta'], GPIO.OUT)
+        GPIO.setup(output['gpio'], GPIO.OUT)
 
     for inp in config_file['input']: 
-        GPIO.setup(inp['porta'], GPIO.IN)
+        GPIO.setup(inp['gpio'], GPIO.IN)
 
 def socket_init():
     global firstfloor
     ip = config_file["ip_central"]
-    port = config_file["porta_central"]
+    port = int(config_file["porta_central"])
     addr = (ip,port)
     while(True): 
         try: 
             print("Iniciando conexão do socket")
             firstfloor = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
             firstfloor.connect(addr)  
+            print("Connected")
             break
         except: 
             time.sleep(1)
 
-
 def vacancy_monitor():
-    global config_file, car_id, start_time_entering, vaga
+    global config_file, state, response_message
     while(True):
         counter = 0
-        gpio = [config_file["output"][0]["porta"], config_file["output"][1]["porta"],config_file["output"][2]["porta"]]
+        gpio = [config_file["output"][0]["gpio"], config_file["output"][1]["gpio"],config_file["output"][2]["gpio"]]
         while counter < 8:
             GPIO.output(gpio, (
                 GPIO.HIGH if counter & 0b0100 else GPIO.LOW ,
@@ -70,83 +104,68 @@ def vacancy_monitor():
                 )
             )
             time.sleep(0.1)
-            entering = config_file["input"][0]["porta"]
-            if(GPIO.input(entering)==1 and status["status"][counter]["ocupada"]==0):
-                status[counter]["id"] = car_id
-                status[counter]["time"] = start_time_entering
-                status[counter]["ocupada"] = 1
+            entering = GPIO.input(config_file["input"][0]["gpio"])
+            if(entering==1 and state[counter]["state"]==0):
+                state[counter]["state"] = 1
+                response_message["vaga"] = counter
+                send_socket(response_message)
 
-            elif(GPIO.input(entering)==0 and status["status"][counter]["ocupada"]==1):
-                status[counter]["id"] = ""
-                status[counter]["ocupada"] = 0
-                status[counter]["time"] = start_time_entering
-                vaga = counter
-            # GPIO.add_event_detect(entering, GPIO.RISING, callback=lambda x: add_id_to(counter))
+            elif(entering==0 and state[counter]["state"]==1):
+                state[counter]["state"] = 0
+                response_message["vaga"] = counter
+                send_socket(response_message)
             counter += 1
-            time.sleep(0.1)
 
+def calculate_qtd_cars_entering(pin):
+    global config_file, entering_message
+    print("entrei aqui")
+    motor = config_file["output"][4]["gpio"]
+    GPIO.output(motor, GPIO.HIGH)
+    time.sleep(2)
+    GPIO.output(motor, GPIO.LOW)
+    # pin = config_file["input"][2]["gpio"]
+    # GPIO.add_event_detect(pin, GPIO.RISING, callback=lambda x: close_cancel(motor))
+    entering_message["gate"]=1
+    send_socket(entering_message)
 
+# def close_cancel(pin):
+#     GPIO.output(pin, GPIO.LOW)
 
-def calculate_number_people_entering(pin):
-    global config_file, qtd_cars
-    global start_time_entering
-    GPIO.output(config_file["output"][4]["porta"], GPIO.HIGH)
-    time.sleep(0.1)
-    GPIO.output(config_file["output"][4]["porta"], GPIO.LOW)
-    # GPIO.output(config_file["output"][4]["porta"], GPIO.LOW)
-    print("aqui")
-    start_time_entering = time.time()
-    qtd_cars+=1
-    # while(True): 
-    #     if(GPIO.input(pin)==0):
-    #         qtd_cars+=1
-    #         break
-    print(qtd_cars)
+# def close_cancel_leave(pin): 
+#     GPIO.output(pin, GPIO.LOW)
 
-def calculate_number_people_leaving(pin):
-    global config_file, qtd_cars, response_message
+def calculate_qtd_cars_leaving(pin):
+    print("estou aqui")
+    global config_file, entering_message
     global end_time_entering
-    GPIO.output(config_file["output"][5]["porta"], GPIO.HIGH)
-    time.sleep(0.1)
-    GPIO.output(config_file["output"][5]["porta"], GPIO.LOW)
-    exit_time = time.time()
-    car_value = exit_time - status[vaga]["time"]
-    response_message["value"]+=car_value
-    # while(True): 
-    #     if(GPIO.input(pin)==0):
-    #         qtd_cars-=1
-    #         break
-    qtd_cars-=1
-    print(qtd_cars)
+    motor = config_file["output"][5]["gpio"]
+    GPIO.output(motor, GPIO.HIGH)
+    time.sleep(2)
+    GPIO.output(motor, GPIO.LOW)
 
+    # pin = config_file["input"][4]["gpio"]
+    # motor = config_file["output"][5]["gpio"]
+    # GPIO.add_event_detect(pin, GPIO.RISING, callback=lambda x: close_cancel_leave(motor))
+    entering_message["gate"]=0
+    send_socket(entering_message)
 
 def count_enter_cars():
     global config_file
-    entering_pin = config_file["input"][1]["porta"]
-    leaving_pin = config_file["input"][3]["porta"]
-    # while(True):
-        # if(GPIO.input(entering_pin)==1):
-        #     GPIO.output(config_file["output"][4]["porta"], GPIO.HIGH)
-        #     car_id = uuid4()
-        # if(GPIO.input(config_file['input'][2]["porta"])==1):
-        #     GPIO.output(config_file["output"][4]["porta"], GPIO.LOW)
-        #     calculate_number_people_entering(config_file["input"][2]["porta"])
-
-    GPIO.add_event_detect(entering_pin, GPIO.RISING, callback=lambda x: calculate_number_people_entering(entering_pin))
-    GPIO.add_event_detect(leaving_pin, GPIO.RISING, callback=lambda x: calculate_number_people_leaving(leaving_pin))
-
-def create_message(): 
-    response_message["cars"] = qtd_cars
+    entering_pin = config_file["input"][1]["gpio"]
+    leaving_pin = config_file["input"][3]["gpio"]
+    GPIO.add_event_detect(entering_pin, GPIO.RISING, callback=lambda x: calculate_qtd_cars_entering(entering_pin))
+    GPIO.add_event_detect(leaving_pin, GPIO.RISING, callback=lambda x: calculate_qtd_cars_leaving(leaving_pin))
 
 def main():
     global config_file
     load_config()
     initialize_response()
-    # socket_thread = Thread(sockset_init(), args=)
-    monitoring = Thread(target=vacancy_monitor, args=())
-    monitoring.start()
+    socket_thread = Thread(target=socket_init, args=())
+    socket_thread.start()
     count_thread = Thread(target=count_enter_cars, args=())
     count_thread.start()
-    
+    monitoring = Thread(target=vacancy_monitor, args=())
+    monitoring.start()
+    listen_socket()
 
 main()

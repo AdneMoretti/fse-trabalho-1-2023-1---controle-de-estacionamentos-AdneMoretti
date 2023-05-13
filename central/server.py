@@ -46,21 +46,25 @@ def present_menu(conn, addr):
             break
         elif option == 1 and command["SINAL_DE_LOTADO_FECHADO_1"] == 0:
             command["SINAL_DE_LOTADO_FECHADO_1"] = 1
-        elif option == 2 and command["SINAL_DE_LOTADO_FECHADO_1"] == 0: 
+            send(conn, addr)
+        elif option == 2: 
             if(qtd_cars<16):
                 command["SINAL_DE_LOTADO_FECHADO_1"] = 0
             else: 
                 print("Estacionamento já está lotado")
+            send(conn, addr)
         elif option == 3:
             command["SINAL_DE_LOTADO_FECHADO_2"] = 1
+            send(conn, addr)
         elif option == 4:
-            if(qtd_cars_2<8):
+            if(qtd_cars_2 < 8):
+                print("oi")
                 command["SINAL_DE_LOTADO_FECHADO_2"] = 0
             else: 
                 print("Andar 2 já está lotado")
+            send(conn, addr)
         elif(option==5): 
             show_states()
-        send(conn, addr)
 
 def show_states(): 
     global qtd_cars, qtd_cars_2, parking_1, parking_2
@@ -84,8 +88,9 @@ def check_first_floor():
         total_time = time.time() - times_1[vaga]["entering_time"]
         total_value += round((total_time/60)*0.15, 3)
     else: 
-        print("carro entrou na vaga do primeiro andar")
         parking_1 += 1
+        print(parking_1)
+        print("carro entrou na vaga do primeiro andar")
         times_1[vaga]["entering_time"] = entering_time
         times_1[vaga]["car_id"] = car_id
 
@@ -136,7 +141,8 @@ def receive(connection, addr):
                 print("Alguem saiu do segundo")
                 qtd_cars2-=1
         
-        if(qtd_cars==16): 
+        if qtd_cars==16 or (qtd_cars==8 and command["SINAL_DE_LOTADO_FECHADO_2"]==1): 
+            print("lotou")
             command["SINAL_DE_LOTADO_FECHADO_1"] = 1
             send(connection, addr)
 

@@ -25,7 +25,7 @@ second_sensor = 0
 
 def initialize_response(): 
     global state
-    for i in range(8):
+    for _ in range(8):
         state.append({"state":0})
 
 def listen_socket(): 
@@ -46,7 +46,7 @@ def listen_socket():
 
 def execute_command(received_message): 
     lotado = config_file["output"][3]["gpio"]
-    if received_message["SINAL_DE_LOTADO_FECHADO_2"] == 0:
+    if received_message["SINAL_DE_LOTADO_FECHADO_2"] == 1:
         GPIO.output(lotado, GPIO.HIGH)
     elif received_message["SINAL_DE_LOTADO_FECHADO_2"] == 0:
         GPIO.output(lotado, GPIO.LOW)
