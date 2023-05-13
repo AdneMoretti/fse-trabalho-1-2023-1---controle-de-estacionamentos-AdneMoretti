@@ -3,7 +3,6 @@ import RPi.GPIO as GPIO
 import json
 import time
 from threading import Thread
-from uuid import uuid4
 
 response_message = {
     "value": 0,
@@ -12,16 +11,16 @@ response_message = {
 }
 
 entering_message = {
-    "qtd_cars": 0, 
     "id": 0, 
-    "gate": 0
+    "gate": 0, 
+    "state": []
 }
 
 state = []
 car_id = ""
-qtd_cars = 0
 start_time_entering = 0
 vaga = 0
+received_message = {}
 
 def initialize_response(): 
     global state
@@ -36,17 +35,37 @@ def listen_socket():
             print('Message not received')
              
             break
+        else: 
+            received_message = data.decode('utf-8')
+            received_message = json.loads(received_message)
+            execute_command(received_message)
+            
     time.sleep(1)
+    firstfloor.close()
+
+def execute_command(received_message): 
+    lotado = config_file["output"][3]["gpio"]
+    if received_message["SINAL_DE_LOTADO_FECHADO_1"] == 0:
+        GPIO.output(lotado, GPIO.HIGH)
+    elif received_message["SINAL_DE_LOTADO_FECHADO_1"] == 0:
+        GPIO.output(lotado, GPIO.LOW)
 
 def send_gate(): 
     data_new = json.dumps(entering_message).encode()
     firstfloor.send(data_new)
     
 def send_socket(): 
-   data = (json.dumps(create_message()))
-   data = data.encode()
-   firstfloor.send(data)
-    
+    global response_message, state
+    try:
+        response_message["state"] = state
+        data = (json.dumps(response_message))
+        data = data.encode()
+        firstfloor.send(data)
+    except:
+        print("Erro ao tentar enviar mensagem")
+        firstfloor.close()
+        socket_init()
+
 def load_config():
     global config_file
     config_file = open('config_first_floor.json')
@@ -70,13 +89,13 @@ def socket_init():
             print("Iniciando conexão do socket")
             firstfloor = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
             firstfloor.connect(addr)  
-            print("connected")
+            print("Connected")
             break
         except: 
             time.sleep(1)
 
 def vacancy_monitor():
-    global config_file, car_id, start_time_entering, vaga,state
+    global config_file, car_id, start_time_entering, vaga, state
     while(True):
         counter = 0
         gpio = [config_file["output"][0]["gpio"], config_file["output"][1]["gpio"],config_file["output"][2]["gpio"]]
@@ -88,58 +107,57 @@ def vacancy_monitor():
                 )
             )
             time.sleep(0.1)
-            entering = config_file["input"][0]["gpio"]
-            if(GPIO.input(entering)==1 and state[counter]["state"]==0):
+            entering = GPIO.input(config_file["input"][0]["gpio"])
+            if(entering==1 and state[counter]["state"]==0):
                 state[counter]["state"] = 1
-                response_message["vaga"] = vaga
+                response_message["vaga"] = counter
                 send_socket()
 
-            elif(GPIO.input(entering)==0 and state[counter]["state"]==1):
-                state[counter]["id"] = ""
+            elif(entering==0 and state[counter]["state"]==1):
                 state[counter]["state"] = 0
-                response_message["vaga"] = vaga
+                response_message["vaga"] = counter
                 send_socket()
-            # GPIO.add_event_detect(entering, GPIO.RISING, callback=lambda x: add_id_to(counter))
             counter += 1
-            time.sleep(0.1)
 
-def calculate_number_people_entering(pin):
-    global config_file, qtd_cars
-    global start_time_entering
-    GPIO.output(config_file["output"][4]["gpio"], GPIO.HIGH)
-    time.sleep(0.1)
-    GPIO.output(config_file["output"][4]["gpio"], GPIO.LOW)
-    # qtd_cars+=1
-    entering_message["qtd_cars"]+=1
-    send_gate(qtd_cars)
+def calculate_qtd_cars_entering(pin):
+    global config_file
+    print("entrei aqui")
+    motor = config_file["output"][4]["gpio"]
+    GPIO.output(motor, GPIO.HIGH)
+    time.sleep(1)
+    GPIO.output(motor, GPIO.LOW)
+    # pin = config_file["input"][2]["gpio"]
+    # GPIO.add_event_detect(pin, GPIO.RISING, callback=lambda x: close_cancel(motor))
+    entering_message["gate"]=1
+    send_gate()
 
-def calculate_number_people_leaving(pin):
+# def close_cancel(pin):
+#     GPIO.output(pin, GPIO.LOW)
+
+# def close_cancel_leave(pin): 
+#     GPIO.output(pin, GPIO.LOW)
+
+def calculate_qtd_cars_leaving(pin):
     print("estou aqui")
-    global config_file, qtd_cars, response_message, vaga
+    global config_file, response_message, vaga
     global end_time_entering
-    GPIO.output(config_file["output"][5]["gpio"], GPIO.HIGH)
-    time.sleep(0.1)
-    GPIO.output(config_file["output"][5]["gpio"], GPIO.LOW)
-    # exit_time = time.time()
-    # # car_value = round(((exit_time - state[vaga]["time"])/60)*0.15)
-    # car_value = round((((exit_time - state[vaga]["time"])/60)*0,15))
-    # qtd_cars-=1
-    entering_message["qtd_cars"] -= 1
-    # response_message["value"] += round(car_value, 2)
-    send_gate(qtd_cars)
+    motor = config_file["output"][5]["gpio"]
+    GPIO.output(motor, GPIO.HIGH)
+    time.sleep(1)
+    GPIO.output(motor, GPIO.LOW)
+
+    # pin = config_file["input"][4]["gpio"]
+    # motor = config_file["output"][5]["gpio"]
+    # GPIO.add_event_detect(pin, GPIO.RISING, callback=lambda x: close_cancel_leave(motor))
+    entering_message["gate"]=0
+    send_gate()
 
 def count_enter_cars():
     global config_file
     entering_pin = config_file["input"][1]["gpio"]
     leaving_pin = config_file["input"][3]["gpio"]
-    GPIO.add_event_detect(entering_pin, GPIO.RISING, callback=lambda x: calculate_number_people_entering(entering_pin))
-    GPIO.add_event_detect(leaving_pin, GPIO.RISING, callback=lambda x: calculate_number_people_leaving(leaving_pin))
-
-def create_message(): 
-    global response_message,state
-    response_message["cars"] = qtd_cars
-    response_message["state"] = state
-    return response_message
+    GPIO.add_event_detect(entering_pin, GPIO.RISING, callback=lambda x: calculate_qtd_cars_entering(entering_pin))
+    GPIO.add_event_detect(leaving_pin, GPIO.RISING, callback=lambda x: calculate_qtd_cars_leaving(leaving_pin))
 
 def main():
     global config_file
@@ -151,6 +169,6 @@ def main():
     monitoring.start()
     count_thread = Thread(target=count_enter_cars, args=())
     count_thread.start()
-    
+    listen_socket()
 
 main()
