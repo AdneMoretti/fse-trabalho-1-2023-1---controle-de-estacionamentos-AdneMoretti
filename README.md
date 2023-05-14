@@ -43,5 +43,4 @@ O vídeo a seguir apresenta o funcionamento do trabalho de forma rápida e simpl
 Observa-se que no vídeo, quando um carro desce o segundo andar quando está lotado, o sensor de lotação não desligou, mas em momento posterior a gravação do vídeo isso foi arrumado, se comportando da forma como deveria. 
 
 
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/5PJN8lX-4vs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+- [Link para o vídeo:](https://www.youtube.com/watch?v=5PJN8lX-4vs) 
