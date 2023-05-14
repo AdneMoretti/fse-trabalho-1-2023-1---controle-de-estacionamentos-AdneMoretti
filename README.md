@@ -40,12 +40,7 @@ Para configurar as portas da placa no primeiro andar existe um arquivo config_se
 O vídeo a seguir apresenta o funcionamento do trabalho de forma rápida e simplificada, apresentando rapidamente o código desenvolvido e o funcionamento ao utilizar os dashboards e realizar diferentes ações.
 
 
-Observa-se que no vídeo, quando um carro desce o segundo andar quando está lotado, o sensor de lotação não desligou, mas em momento posterior a gravação do vídeo isso foi arrumado, se comportando da forma como deveria. 
+Observa-se que no vídeo, quando um carro desce o segundo andar quando está lotado, o sensor de lotação não desligou, mas em momento posterior a gravação do vídeo isso foi corrigido, se comportando da forma como deveria. 
 
 
-<<<<<<< HEAD
-- [Link para o vídeo:](https://www.youtube.com/watch?v=5PJN8lX-4vs) 
-=======
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/5PJN8lX-4vs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen/>
->>>>>>> cc41f074775ddc5302f159193966a97444755189
+- [Apresentação do trabalho](https://www.youtube.com/watch?v=5PJN8lX-4vs)
