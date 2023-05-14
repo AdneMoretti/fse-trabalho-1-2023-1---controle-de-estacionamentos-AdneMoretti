@@ -30,11 +30,17 @@ Para configurar as portas da placa no primeiro andar existe um arquivo config_se
 ```cd distributed```
 ```python second_floor.py```
 
+## Dependências
+ - Rpi.GPIO
+ - Python 3.9.2
+
+
 ## Vídeo de apresentação do sistema em funcionamento
 
 O vídeo a seguir apresenta o funcionamento do trabalho de forma rápida e simplificada, apresentando rapidamente o código desenvolvido e o funcionamento ao utilizar os dashboards e realizar diferentes ações.
 
 
 Observa-se que no vídeo, quando um carro desce o segundo andar quando está lotado, o sensor de lotação não desligou, mas em momento posterior a gravação do vídeo isso foi arrumado, se comportando da forma como deveria. 
+
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/5PJN8lX-4vs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
