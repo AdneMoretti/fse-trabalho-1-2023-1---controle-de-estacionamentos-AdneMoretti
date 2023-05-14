@@ -35,10 +35,11 @@ def listen_socket():
         else: 
             received_message = data.decode('utf-8')
             received_message = json.loads(received_message)
+            print(received_message)
             execute_command(received_message)
                 
-        time.sleep(1)
-        second_floor_socket.close()
+    time.sleep(1)
+    second_floor_socket.close()
 
 def execute_command(received_message): 
     lotado = config_file["output"][3]["gpio"]
@@ -47,10 +48,6 @@ def execute_command(received_message):
     elif received_message["SINAL_DE_LOTADO_FECHADO_2"] == 0:
         GPIO.output(lotado, GPIO.LOW)
 
-# def send_gate(): 
-#     data_new = json.dumps(entering_message).encode()
-#     second_floor_socket.send(data_new)
-    
 def send_socket(message): 
     try:
         data = (json.dumps(message))
@@ -106,12 +103,13 @@ def vacancy_monitor():
             if(entering==1 and state[counter]["state"]==0):
                 state[counter]["state"] = 1
                 response_message["vaga"] = counter
-                print("carro entrou na vaga")
+                print(response_message)
                 send_socket(response_message)
 
             elif(entering==0 and state[counter]["state"]==1):
                 state[counter]["state"] = 0
                 response_message["vaga"] = counter
+                print(response_message)
                 send_socket(response_message)
             counter += 1
 
@@ -119,21 +117,13 @@ def calculate_qtd_cars_entering():
     global entering_message
     entering_message["gate"]=1
     send_socket(entering_message)
-
+    time.sleep(2)
 
 def calculate_qtd_cars_leaving():
     global entering_message
     entering_message["gate"]=0
     send_socket(entering_message)
-
-# def calculating_time_first():
-#     change = True
-#     global first_sensor
-#     first_sensor = time.time()
-
-# def calculating_time_second(): 
-#     global second_sensor
-#     second_sensor = time.time()
+    time.sleep(2)
 
 def count_cars():
     global config_file
@@ -141,40 +131,11 @@ def count_cars():
     second_pin = config_file["input"][2]["gpio"]
     while(True):
         if(GPIO.input(first_pin) and not GPIO.input(second_pin)): 
-            print("subindo")
+            print("Subindo")
             calculate_qtd_cars_entering()
-        if(not GPIO.input(first_pin) and not GPIO.input(second_pin)): 
-            print("descendo")
+        if(not GPIO.input(first_pin) and GPIO.input(second_pin)): 
+            print("Descendo")
             calculate_qtd_cars_leaving()
-
-    # while(True): 
-    #     if GPIO.input(first_pin)==1 and not first_visited: 
-    #         print("entrei aqui depois")
-    #         change += 1
-    #         first_visited = True
-    #         first_sensor = time.time()
-
-    #     if GPIO.input(second_pin)==1 and not second_visited:
-    #         print("entrei aqui primeiro")
-    #         change += 1
-    #         second_visited = True
-    #         second_sensor = time.time()
-        
-    #     if change == 2: 
-    #         print(first_sensor)
-    #         print(second_sensor)
-    #         if first_sensor < second_sensor: 
-    #             print("carro subindo")
-    #             calculate_qtd_cars_entering()
-    #             change=0
-    #             first_visited=0
-    #             second_visited=0
-    #         elif second_sensor < first_sensor :
-    #             print("carro descendo")
-    #             calculate_qtd_cars_leaving()
-    #             change=0
-    #             second_visited=0
-    #             first_visited=0
 
 def main():
     global config_file
@@ -188,4 +149,5 @@ def main():
     count_thread.start()
     listen_socket()
 
-main()
+if __name__ == '__main__': 
+    main()

@@ -9,16 +9,15 @@ response_message = {
     "vaga": -1, 
     "id": 1
 }
-
 entering_message = {
     "id": 0, 
     "gate": 0, 
     "state": []
 }
-
 state = []
 received_message = {}
 
+# Inicia valores como 0 do dicionário de resposta
 def initialize_response(): 
     global state
     for _ in range(8):
@@ -37,6 +36,7 @@ def listen_socket():
         else: 
             received_message = data.decode('utf-8')
             received_message = json.loads(received_message)
+            print(received_message)
             execute_command(received_message)
     time.sleep(1)
     first_floor_socket.close()
@@ -49,10 +49,7 @@ def execute_command(received_message):
     elif received_message["SINAL_DE_LOTADO_FECHADO_1"] == 0:
         GPIO.output(lotado, GPIO.LOW)
 
-# def send_gate(): 
-#     data_new = json.dumps(entering_message).encode()
-#     first_floor_socket.send(data_new)
-    
+#Função que tenta enviar mensagem para o servidor central
 def send_socket(message): 
     try:
         data = (json.dumps(message))
@@ -63,6 +60,7 @@ def send_socket(message):
         first_floor_socket.close()
         socket_init()
 
+# Função que carrega os pinos da GPIO a partir do arquivo de config
 def load_config():
     global config_file
     config_file = open('config_first_floor.json')
@@ -76,6 +74,7 @@ def load_config():
     for inp in config_file['input']: 
         GPIO.setup(inp['gpio'], GPIO.IN)
 
+#Inicializa e conecta o primeiro andar com o servidor central
 def socket_init():
     global first_floor_socket
     ip = config_file["ip_central"]
@@ -91,6 +90,7 @@ def socket_init():
         except: 
             time.sleep(1)
 
+# Função que verifica a todo momento o estado das vagas e manda para o servidor central o estados a cada vez que alguém entra e sai da vaga
 def vacancy_monitor():
     global config_file, state, response_message
     while(True):
@@ -109,46 +109,37 @@ def vacancy_monitor():
                 state[counter]["state"] = 1
                 response_message["vaga"] = counter
                 send_socket(response_message)
+                print(response_message)
 
             elif(entering==0 and state[counter]["state"]==1):
                 state[counter]["state"] = 0
                 response_message["vaga"] = counter
                 send_socket(response_message)
+                print(response_message)
             counter += 1
 
+# Função que abre a fecha cancela de entrada para o carro entrar e notifica o central
 def calculate_qtd_cars_entering(pin):
     global config_file, entering_message
-    print("entrei aqui")
     motor = config_file["output"][4]["gpio"]
     GPIO.output(motor, GPIO.HIGH)
     time.sleep(2)
     GPIO.output(motor, GPIO.LOW)
-    # pin = config_file["input"][2]["gpio"]
-    # GPIO.add_event_detect(pin, GPIO.RISING, callback=lambda x: close_cancel(motor))
     entering_message["gate"]=1
     send_socket(entering_message)
 
-# def close_cancel(pin):
-#     GPIO.output(pin, GPIO.LOW)
-
-# def close_cancel_leave(pin): 
-#     GPIO.output(pin, GPIO.LOW)
-
+# Função que abre a fecha cancela de entrada para o carro saiu e notifica o central
 def calculate_qtd_cars_leaving(pin):
-    print("estou aqui")
     global config_file, entering_message
     global end_time_entering
     motor = config_file["output"][5]["gpio"]
     GPIO.output(motor, GPIO.HIGH)
     time.sleep(2)
     GPIO.output(motor, GPIO.LOW)
-
-    # pin = config_file["input"][4]["gpio"]
-    # motor = config_file["output"][5]["gpio"]
-    # GPIO.add_event_detect(pin, GPIO.RISING, callback=lambda x: close_cancel_leave(motor))
     entering_message["gate"]=0
     send_socket(entering_message)
 
+# Detecta se algum carro entrou ou saiu
 def count_cars():
     global config_file
     entering_pin = config_file["input"][1]["gpio"]
@@ -168,4 +159,5 @@ def main():
     monitoring.start()
     listen_socket()
 
-main()
+if __name__ == '__main__': 
+    main()
